@@ -8,6 +8,11 @@
   "engines": {
     "node": "18"
   },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "prisma generate && tsup src/server.ts --minify",
+    "start": "node dist/server.js"
+  },
   "devDependencies": {
     "@types/node": "^20.2.1",
     "prisma": "^4.14.1",
