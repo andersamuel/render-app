@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import fastify from "fastify";
 import { z } from "zod";
 
@@ -7,6 +8,8 @@ const zodSchema = z.object({
   name: z.string().nonempty(),
   age: z.coerce.number(),
 });
+
+const prisma = new PrismaClient();
 
 async function ZodValidation<T>(args: z.SafeParseReturnType<T, T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -19,7 +22,21 @@ async function ZodValidation<T>(args: z.SafeParseReturnType<T, T>): Promise<T> {
 }
 
 server.get("/", async (request, reply) => {
-  return `Server Version ${process.env.npm_package_version}`;
+  const hello = await prisma.hello.findFirst();
+
+  if (!hello) {
+    const create = await prisma.hello.create({
+      data: {
+        message: "World",
+      },
+    });
+
+    return reply.send({ hello: create.message });
+  }
+
+  return reply.send({ hello: hello.message });
+
+  // return `Server Version ${process.env.npm_package_version}`;
 });
 
 server.get("/ping", async (request, reply) => {
@@ -40,5 +57,6 @@ server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
     console.error(err);
     process.exit(1);
   }
+
   console.log(`Server listening at ${address}`);
 });
